@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pixelapi"
+version = "0.1.0"
+description = "Official Python SDK for PixelAPI - AI Image Processing API"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "PixelAPI", email = "support@pixelapi.dev"}
+]
+keywords = ["image", "api", "ai", "background-removal", "image-generation", "upscaling"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+dependencies = ["requests>=2.25.0"]
+
+[project.urls]
+Homepage = "https://pixelapi.dev"
+Documentation = "https://pixelapi.dev/docs"
+Repository = "https://github.com/pixelapi/pixelapi-python"
+
+[tool.setuptools.packages.find]
+where = ["."]
