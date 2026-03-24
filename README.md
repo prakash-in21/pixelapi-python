@@ -1,204 +1,103 @@
 # PixelAPI Python SDK
 
-Official Python SDK for [PixelAPI](https://pixelapi.dev) - AI-powered image processing API.
+Official Python SDK for [PixelAPI](https://pixelapi.dev) — AI image processing that doesn't cost a fortune.
 
 [![PyPI version](https://badge.fury.io/py/pixelapi.svg)](https://pypi.org/project/pixelapi/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+## What it does
 
-- 🎨 **Image Generation** - FLUX, SDXL text-to-image
-- ✂️ **Background Removal** - Instant, accurate cutouts
-- 🔍 **4x Upscaling** - AI-powered resolution enhancement  
-- 👤 **Face Restoration** - Fix blurry/damaged faces
-- 🧹 **Object Removal** - Erase unwanted elements
-- 📝 **Text Removal** - Remove watermarks/text
-- 🌅 **Outpainting** - Extend images beyond borders
-- 🎭 **AI Shadows** - Add realistic product shadows
-- 📦 **Batch Processing** - Process up to 100 images
+Background removal, AI product photography, image generation, upscaling, virtual try-on, object removal, face restoration, outpainting, image captioning — all through one API. Runs on privately owned GPUs, so no cold starts and no "serverless" unpredictability.
 
-## Installation
+Pricing: $0.001–$0.075 per image depending on operation. Typically 5–10x cheaper than Replicate or fal.ai for the same models.
+
+## Install
 
 ```bash
 pip install pixelapi
 ```
 
-## Quick Start
+## Quickstart
 
 ```python
-from pixelapi import PixelAPI
+import pixelapi
 
-# Initialize client
-client = PixelAPI("your_api_key")
+client = pixelapi.Client(api_key="YOUR_API_KEY")
 
 # Remove background
-result = client.remove_background("photo.jpg")
-result.save("cutout.png")
+result = client.remove_background("product.jpg")
+print(result.output_url)  # direct link to PNG with transparent background
 
 # Generate image
-result = client.generate("A golden retriever on a beach, sunset")
-result.save("generated.png")
-
-# Upscale image
-result = client.upscale("low_res.jpg", scale=4)
-result.save("high_res.png")
-```
-
-## Usage Examples
-
-### Background Removal
-
-```python
-# From file
-result = client.remove_background("product.jpg")
-
-# From URL
-result = client.remove_background("https://example.com/image.jpg")
-
-# From bytes
-with open("image.png", "rb") as f:
-    result = client.remove_background(f.read())
-
-# Save result
-result.save("output.png")
-print(f"Credits used: {result.credits_used}")
-```
-
-### Image Generation
-
-```python
-# Basic generation
-result = client.generate("A futuristic cityscape at night")
-
-# With parameters
-result = client.generate(
-    prompt="A serene Japanese garden",
-    model="flux-schnell",  # or "sdxl"
-    width=1024,
-    height=1024,
-    negative_prompt="blurry, low quality",
-    seed=42
-)
-```
-
-### Replace Background
-
-```python
-# With another image
-result = client.replace_background(
-    image="portrait.jpg",
-    background="beach.jpg"
+result = client.generate_image(
+    prompt="a minimalist leather wallet on marble surface, product photography",
+    model="flux-schnell"
 )
 
-# With AI-generated background
-result = client.replace_background(
-    image="portrait.jpg",
-    prompt="professional office environment"
+# AI product photography (BG removal + new background in one call)
+result = client.product_photo(
+    image="shoe.jpg",
+    preset="white-studio"  # or gradient-light, marble, outdoor
 )
-```
 
-### Face Restoration
-
-```python
-result = client.restore_face("old_photo.jpg")
-result.save("restored.png")
-```
-
-### Object Removal
-
-```python
-# Remove object using mask
-result = client.remove_object(
-    image="photo.jpg",
-    mask="mask.png"  # White = remove
-)
-```
-
-### Outpainting (Extend Image)
-
-```python
-result = client.outpaint(
-    image="landscape.jpg",
-    direction="all",  # left, right, up, down, all
-    pixels=256,
-    prompt="continue the mountain scenery"
-)
-```
-
-### AI Shadow
-
-```python
+# Add realistic shadow
 result = client.add_shadow(
-    image="product.png",
-    shadow_opacity=0.5,
-    shadow_blur=20,
-    shadow_offset_x=10,
-    shadow_offset_y=15
+    image_url=result.output_url,
+    shadow_type="soft",  # soft, hard, natural, floating
+    shadow_opacity=0.5
 )
+
+# Auto-caption a product image
+result = client.caption_image(
+    image="product.jpg",
+    mode="full"  # returns description + tags + alt text + SEO title
+)
+print(result.tags)   # ["sneaker", "leather", "black", "casual"]
+print(result.caption)  # "Black leather sneaker with white rubber sole..."
 ```
 
-### Batch Processing
+## Batch processing
+
+No batch API needed — just use threads or async:
 
 ```python
-# Process multiple images
-images = ["img1.jpg", "img2.jpg", "img3.jpg"]
-batch = client.batch("remove-bg", images)
+import concurrent.futures
+from pathlib import Path
 
-# Wait for completion
-results = batch.wait()
-for i, result in enumerate(results):
-    result.save(f"output_{i}.png")
+images = list(Path("products/").glob("*.jpg"))
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+    results = list(pool.map(client.remove_background, images))
+
+# 500 images × $0.005 = $2.50 total
+# remove.bg charges $35–100 for the same
 ```
 
-### Check Usage
+## Full API coverage
 
-```python
-usage = client.get_usage()
-print(f"Credits remaining: {usage['credits_remaining']}")
-print(f"Credits used: {usage['credits_used']}")
-```
-
-## Pricing
-
-| Operation | Credits | ~USD |
-|-----------|---------|------|
-| Background Removal | 10 | $0.01 |
-| Image Generation | 12 | $0.012 |
-| Premium Generation | 25 | $0.025 |
-| 4x Upscale | 50 | $0.05 |
-| Face Restoration | 25 | $0.025 |
-| Object Removal | 20 | $0.02 |
-| Text Removal | 20 | $0.02 |
-| Add Shadow | 10 | $0.01 |
-| Outpaint | 25 | $0.025 |
-
-## Error Handling
-
-```python
-from pixelapi import PixelAPI, AuthenticationError, InsufficientCreditsError
-
-try:
-    result = client.remove_background("image.jpg")
-except AuthenticationError:
-    print("Invalid API key")
-except InsufficientCreditsError:
-    print("Not enough credits - top up at pixelapi.dev")
-except PixelAPIError as e:
-    print(f"API error: {e.message}")
-```
-
-## Get API Key
-
-Sign up at [pixelapi.dev](https://pixelapi.dev) to get your free API key with 100 credits.
+| Operation | Method | Cost |
+|-----------|--------|------|
+| Background removal | `remove_background()` | $0.005 |
+| Image generation (FLUX/SDXL) | `generate_image()` | $0.001 |
+| 4x upscale | `upscale()` | $0.005 |
+| AI product photography | `product_photo()` | $0.075 |
+| Add shadow | `add_shadow()` | $0.020 |
+| Image captioning + tags | `caption_image()` | $0.005 |
+| Virtual try-on | `virtual_tryon()` | $0.050 |
+| Object removal | `remove_object()` | $0.020 |
+| Text removal | `remove_text()` | $0.020 |
+| Face restoration | `restore_face()` | $0.005 |
+| Outpainting | `outpaint()` | $0.030 |
+| Text-to-video (Wan 2.1) | `generate_video()` | TBD |
 
 ## Links
 
-- [Documentation](https://pixelapi.dev/docs)
-- [API Reference](https://api.pixelapi.dev/docs)
+- [Full docs](https://pixelapi.dev/docs.html)
+- [Tutorials](https://pixelapi.dev/tutorials/)
+- [Dashboard + API key](https://pixelapi.dev/app/)
 - [Pricing](https://pixelapi.dev/#pricing)
-- [GitHub](https://github.com/pixelapi/pixelapi-python)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT
