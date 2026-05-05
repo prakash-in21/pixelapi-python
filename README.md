@@ -1,27 +1,18 @@
-# PixelAPI - AI Image Processing API | Background Removal, Upscaling, Generation
+# PixelAPI — Official Python SDK
 
-Official Python SDK for [PixelAPI](https://pixelapi.dev) — **2x cheaper than alternatives. Powered by bare-metal GPUs.**
+Official Python SDK for [PixelAPI](https://pixelapi.dev) — *AI image, video, audio, and 3D API for builders.*
 
 [![PyPI version](https://badge.fury.io/py/pixelapi.svg)](https://pypi.org/project/pixelapi/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why PixelAPI?
+## Why PixelAPI
 
-- **50% cheaper** than Remove.bg, Cloudinary AI, Replicate
-- **Bare-metal GPUs** — no cold starts, consistent speed
-- **One API** for background removal, upscaling, generation, object removal, face restoration
-- **No usage limits** — process 10,000+ images/day with no throttling
-- **Simple pricing** — $0.001–$0.05 per operation, no monthly fees
-
-## Alternatives to Remove.bg & Cloudinary
-
-| Service | Background Removal | 4x Upscale | Image Generation |
-|---------|-------------------|------------|------------------|
-| PixelAPI | $0.005 | $0.005 | $0.001 |
-| Remove.bg | $0.09 | N/A | N/A |
-| Cloudinary AI | $0.10 | $0.15 | N/A |
-| Replicate | $0.012 | $0.012 | $0.003 |
+- **From $0.001 per image** — image gen $0.001, BG removal $0.010, upscale $0.060, face restore $0.005, object removal $0.025
+- **15 AI tools, one API key** — image gen, BG removal, upscale, face restore, object removal, image edit, audio (music), TTS (23 languages), 3D model gen, content moderation, smart-generate, ad creative, image search, portrait studio, interior design, photo relighting
+- **No cold starts** — always-warm infrastructure, sub-3-second response on most endpoints
+- **100 free credits on signup** — no credit card required
+- **GST invoice (India)** — registered Indian business, GST-compliant
 
 ## Installation
 
@@ -29,201 +20,125 @@ Official Python SDK for [PixelAPI](https://pixelapi.dev) — **2x cheaper than a
 pip install pixelapi
 ```
 
-## Quick Start
+## Quickstart
 
 ```python
 from pixelapi import PixelAPI
 
-client = PixelAPI("your_api_key")
+client = PixelAPI("YOUR_API_KEY")  # get free at https://pixelapi.dev/app
 
-# Remove background
-result = client.remove_background("product.jpg")
-result.save("output.png")
+# 1. Generate AI image — $0.001
+result = client.generate("product photo of red sneakers, white background, studio lighting")
+result.save("sneakers.png")
 
-# Generate image
-result = client.generate("A sunset over mountains", model="flux-schnell")
-result.save("generated.png")
+# 2. Remove background — $0.010
+result = client.remove_background("photo.jpg")
+result.save("transparent.png")
 
-# Upscale 4x
+# 3. Upscale 4× — $0.060
 result = client.upscale("photo.jpg", scale=4)
 result.save("upscaled.png")
+
+# 4. Restore faces — $0.005
+result = client.face_restore("old_family_photo.jpg")
+result.save("restored.jpg")
 ```
 
-## Features
+## Endpoints
 
-### Background Removal
+| Method | Description | Price |
+|---|---|---|
+| `client.generate(prompt)` | AI image gen | $0.001 |
+| `client.remove_background(image)` | BG removal → transparent PNG | $0.010 |
+| `client.replace_background(image, scene)` | BG replacement (AI scene) | $0.075 |
+| `client.upscale(image, scale=4)` | 4× upscaling | $0.060 |
+| `client.face_restore(image)` | Face restoration | $0.005 |
+| `client.remove_object(image, prompt)` | Object/person removal | $0.025 |
+| `client.edit(image, prompt)` | Prompt-driven edit | $0.020 |
+| `client.relight(image, preset)` | Photo relighting | $0.018 |
+| `client.moderate(image)` | NSFW / content moderation | $0.0005 |
+| `client.audio(prompt)` | AI music generation | $0.007 |
+| `client.tts(text, voice)` | Text-to-speech (23 langs) | $0.015/30s |
+| `client.three_d(prompt)` | 3D model generation (GLB) | $0.50 |
+
+## Pricing
+
+| Plan | Monthly | Credits | Per-image |
+|---|---|---|---|
+| Free | $0 | 100 | — |
+| Starter | $10 | 10,000 | $0.001 avg |
+| Pro | $50 | 60,000 | $0.00083 avg |
+| Scale | $200 | 300,000 | $0.00067 avg |
+
+## Authentication
+
 ```python
-# Remove background → transparent PNG
-result = client.remove_background("product.jpg")
-
-# Replace with new background
-result = client.replace_background(
-    image="person.jpg",
-    background="beach.jpg"
-)
-
-# Or generate background from text
-result = client.replace_background(
-    image="person.jpg",
-    prompt="professional office background"
-)
+client = PixelAPI("YOUR_API_KEY")
+# or set PIXELAPI_KEY env var:
+# import os; client = PixelAPI(os.environ["PIXELAPI_KEY"])
 ```
 
-### Image Generation
-```python
-result = client.generate(
-    prompt="minimalist product photo of a watch",
-    model="flux-schnell",  # or "sdxl"
-    width=1024,
-    height=1024,
-    negative_prompt="blurry, low quality"
-)
-result.save("generated.png")
-```
+Get your API key at [pixelapi.dev/app](https://pixelapi.dev/app) — 100 free credits, no credit card.
 
-### Image Enhancement
-```python
-# 4x upscaling
-result = client.upscale("photo.jpg", scale=4)
-
-# Face restoration
-result = client.restore_face("old_photo.jpg")
-```
-
-### Object Manipulation
-```python
-# Remove unwanted objects
-result = client.remove_object(
-    image="photo.jpg",
-    mask="mask.png"  # white = remove
-)
-
-# Remove text/watermarks
-result = client.remove_text("watermarked.jpg")
-```
-
-### Advanced Features
-```python
-# Add realistic shadow
-result = client.add_shadow(
-    image="product.png",
-    shadow_opacity=0.5,
-    shadow_blur=20
-)
-
-# Extend image borders (outpainting)
-result = client.outpaint(
-    image="photo.jpg",
-    direction="all",
-    pixels=256,
-    prompt="continue the landscape"
-)
-```
-
-### Batch Processing
-```python
-# Process multiple images efficiently
-batch = client.batch(
-    operation="remove-bg",
-    images=["photo1.jpg", "photo2.jpg", "photo3.jpg"]
-)
-
-# Wait for completion
-results = batch.wait()
-for i, result in enumerate(results):
-    result.save(f"output_{i}.png")
-```
-
-### Account Management
-```python
-# Check usage and credits
-usage = client.get_usage()
-print(f"Credits remaining: {usage['credits_remaining']}")
-print(f"Credits used this month: {usage['credits_used']}")
-
-# List available models
-models = client.get_models()
-print(models)
-```
-
-## Examples
-
-See the [examples/](examples/) directory for complete working examples:
-
-- `remove_background.py` - Basic background removal
-- `generate_images.py` - Text-to-image generation
-- `batch_processing.py` - Process multiple images
-- `product_photo.py` - E-commerce product photography workflow
-
-## API Reference
-
-### Methods
-
-- `remove_background(image)` - Remove image background
-- `replace_background(image, background=None, prompt=None)` - Replace background
-- `generate(prompt, model, width, height, ...)` - Generate image from text
-- `upscale(image, scale)` - Upscale image 2x or 4x
-- `restore_face(image)` - Restore and enhance faces
-- `remove_object(image, mask)` - Remove objects using mask
-- `remove_text(image)` - Remove text/watermarks
-- `add_shadow(image, shadow_opacity, ...)` - Add realistic shadow
-- `outpaint(image, direction, pixels, prompt)` - Extend image borders
-- `batch(operation, images, **kwargs)` - Batch processing
-- `get_usage()` - Get credit usage
-- `get_models()` - List available models
-
-### Image Input
-
-All methods accept images as:
-- File path: `"photo.jpg"`
-- URL: `"https://example.com/image.jpg"`
-- Bytes: `open("photo.jpg", "rb").read()`
-- Base64 string
-
-### Error Handling
+## Errors
 
 ```python
-from pixelapi import PixelAPI, PixelAPIError, AuthenticationError, RateLimitError
+from pixelapi import PixelAPI, AuthenticationError, RateLimitError, InsufficientCreditsError
 
 try:
     result = client.remove_background("photo.jpg")
 except AuthenticationError:
     print("Invalid API key")
+except InsufficientCreditsError:
+    print("Out of credits — top up at /app")
 except RateLimitError:
-    print("Rate limit exceeded")
-except PixelAPIError as e:
-    print(f"API error: {e.message}")
+    print("Rate limited — slow down or upgrade plan")
 ```
 
-## Pricing
+## Rate limits
 
-| Operation | Cost | Remove.bg | Cloudinary |
-|-----------|------|-----------|------------|
-| Background removal | $0.005 | $0.09 | $0.10 |
-| Image generation | $0.001 | N/A | N/A |
-| 4x upscale | $0.005 | N/A | $0.15 |
-| Face restoration | $0.005 | N/A | $0.12 |
-| Object removal | $0.020 | N/A | $0.10 |
+- Free: 10 requests / minute
+- Starter: 60 / minute
+- Pro: 300 / minute
+- Scale: unlimited (fair-use)
 
-No monthly fees. No usage limits. Pay only for what you use.
+## Migration from remove.bg / Cloudinary / Replicate
 
-## Get API Key
+PixelAPI's BG removal is API-compatible with most workflows that take an image input and return a transparent PNG output URL. The migration is typically a 30-minute swap:
 
-1. Visit [https://pixelapi.dev/app/](https://pixelapi.dev/app/)
-2. Sign up (free tier includes 100 credits)
-3. Copy your API key from dashboard
+```python
+# Before (remove.bg)
+import requests
+r = requests.post("https://api.remove.bg/v1.0/removebg",
+    files={"image_file": open("photo.jpg", "rb")},
+    headers={"X-API-Key": REMOVEBG_KEY})
+open("output.png", "wb").write(r.content)
 
-## Links
+# After (PixelAPI — 11× cheaper, same output)
+from pixelapi import PixelAPI
+client = PixelAPI(PIXELAPI_KEY)
+client.remove_background("photo.jpg").save("output.png")
+```
 
-- 🌐 [Website](https://pixelapi.dev)
-- 📚 [Documentation](https://pixelapi.dev/docs)
-- 🔑 [Get API Key](https://pixelapi.dev/app/)
-- 💬 [Discord Community](https://discord.gg/pixelapi)
+## Examples
+
+See [`examples/`](examples/) for full code samples:
+- Bulk product-photo BG removal (Shopify catalog)
+- LinkedIn-headshot generation pipeline
+- E-commerce upscale + relight workflow
+- Audio-on-demand for video apps
+
+## Support
+
+- Docs: [pixelapi.dev/docs](https://pixelapi.dev/docs)
+- API ref: [pixelapi.dev/developers.html](https://pixelapi.dev/developers.html)
+- Issues: [GitHub issues](https://github.com/prakash-in21/pixelapi-python/issues)
+- Email: support@pixelapi.dev
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-**Keywords**: background removal, image upscaling, AI image generation, object removal, face restoration, image processing API, remove.bg alternative, cloudinary alternative, replicate alternative, AI image API
+Built by [PixelAPI](https://pixelapi.dev). Indian business, GST registered.
